@@ -1,35 +1,21 @@
-# inventory-test
+# Инвентарь
 
-This template should help get you started developing with Vue 3 in Vite.
+Данный проект является тестовым заданием. Задание заключается в создании веб-приложения - автономно работающего инвентаря
 
-## Recommended IDE Setup
+## Описание функционала
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Основной функционал:
+- **Просмотр информации о предметах в инвентаре** (имя, описание, количество).
+- **Удаление предметов**(и выбор количества) в инвентаре.
+- Возможность **перемещения** предметов по инвентарю.
 
-## Customize configuration
+А так же сохранение всех изменений при перезагрузке страницы или закрытии браузера.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Запуск проекта
 
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+1. Клонируйте репозиторий.
+2. Убедитесь, что у вас установлены необходимые зависимости.
+3. Запустите Vue следующими командами:
+   **- npm install** 
+   **- npm run dev**
+4. Веб-приложение будет доступно по адресу **localhost:5173**.
