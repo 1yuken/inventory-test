@@ -2,33 +2,30 @@
 <script setup>
 import { ref, computed, watch, onMounted, reactive } from 'vue'
 
-const slots = reactive([
+const slots = ref([
   {
-    item: {
+    item: reactive({
       image: '/public/item-1.png',
       count: 4,
       name: 'Предмет 1',
-      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur
-            possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
-    },
+      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
+    }),
   },
   {
-    item: {
+    item: reactive({
       image: '/public/item-2.png',
       count: 2,
       name: 'Предмет 2',
-      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur
-            possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
-    },
+      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
+    }),
   },
   {
-    item: {
+    item: reactive({
       image: '/public/item-3.png',
       count: 5,
       name: 'Предмет 3',
-      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur
-            possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
-    },
+      description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!`,
+    }),
   },
   { item: null },
   { item: null },
@@ -73,8 +70,6 @@ const loadFromLocalStorage = () => {
   }
 }
 
-loadFromLocalStorage()
-
 watch(slots, saveToLocalStorage, { deep: true })
 
 const slotClasses = computed(() =>
@@ -101,7 +96,7 @@ const onDragStart = (event, index) => {
     return
   }
 
-  event.dataTransfer.setData('draggedIndex', index)
+  event.dataTransfer.setData('draggedIndex', index.toString())
   event.target.classList.add('dragging')
 }
 
@@ -112,10 +107,16 @@ const onDragEnd = (event) => {
 const onDrop = (event, targetIndex) => {
   event.preventDefault()
 
-  const draggedIndex = event.dataTransfer.getData('draggedIndex')
-  if (draggedIndex !== undefined && draggedIndex !== '' && slots.value[targetIndex].item === null) {
-    slots.value[targetIndex].item = slots.value[draggedIndex].item
-    slots.value[draggedIndex].item = null
+  const draggedIndex = parseInt(event.dataTransfer.getData('draggedIndex'), 10)
+  if (!isNaN(draggedIndex) && draggedIndex !== targetIndex) {
+    if (slots.value[targetIndex].item === null) {
+      slots.value[targetIndex].item = slots.value[draggedIndex].item
+      slots.value[draggedIndex].item = null
+    } else {
+      const temp = slots.value[targetIndex].item
+      slots.value[targetIndex].item = slots.value[draggedIndex].item
+      slots.value[draggedIndex].item = temp
+    }
   }
 }
 
@@ -151,10 +152,11 @@ const closeDeleteConfirm = () => {
 
 const confirmDelete = () => {
   const quantity = parseInt(deleteQuantity.value)
-  if (quantity > 0 && quantity <= selectedItem.value.count) {
-    slots.value[selectedItem.value.index].item.count -= quantity
-    if (slots.value[selectedItem.value.index].item.count === 0) {
-      slots.value[selectedItem.value.index].item = null
+  if (quantity > 0 && selectedItem.value && quantity <= selectedItem.value.count) {
+    const index = selectedItem.value.index
+    slots.value[index].item.count -= quantity
+    if (slots.value[index].item.count === 0) {
+      slots.value[index].item = null
     }
     closeItemInfo()
   }
@@ -173,24 +175,24 @@ const updateGridRect = () => {
 }
 
 onMounted(() => {
+  loadFromLocalStorage()
   updateGridRect()
   window.addEventListener('resize', updateGridRect)
 })
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen w-full">
+  <div class="relative flex items-center justify-center min-h-screen w-full">
     <div class="bg-[#1D1D1D] max-w-[850px] w-full p-8 flex flex-col">
       <div class="flex items-center justify-center gap-6 relative">
         <div class="bg-[#262626] border border-[#4D4D4D] rounded-lg py-[18px] px-4">
-          <img class="rounded-md" src="/public/img-blur.png" alt="#" />
+          <img class="rounded-md object-cover" src="/public/img-blur.png" alt="#" width="208px" height="240px"/>
           <h2 class="text-xl text-center mt-1">Инвентарь</h2>
-          <p class="text-center max-w-[200px] mt-1">
+          <p class="text-center max-w-[200px] mt-1 overflow-y-auto max-h-[192px]">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur
             possimus suscipit doloremque tempora quos explicabo officia! Voluptas optio!
           </p>
         </div>
-
         <div class="grid grid-cols-5 w-fit rounded-lg" ref="gridRef">
           <div
             v-for="(slot, index) in slots"
@@ -223,7 +225,7 @@ onMounted(() => {
             class="absolute right-0 w-60 bg-[#262626] border border-l border-[#4D4D4D] overflow-y-auto rounded-r-lg flex flex-col"
             :style="{ top: '2.5px', height: '99%', transform: 'translateX(-10px)' }"
           >
-            <div class="p-6">
+            <div class="p-6 overflow-y-hidden">
               <div class="flex justify-between items-start mb-4">
                 <h3 class="text-xl font-bold"></h3>
                 <button
@@ -244,54 +246,66 @@ onMounted(() => {
                   </svg>
                 </button>
               </div>
-              <img
-                :src="selectedItem.image"
-                alt="Item"
-                class="w-24 h-24 object-contain mx-auto mb-4"
-              />
-              <div class="border-y-1 py-2 border-[#4D4D4D] flex-1">
-                <h3 class="text-2xl font-bold text-center">
-                  {{ selectedItem.name }}
-                </h3>
-                <p class="text-sm mb-4 mt-2 text-center">{{ selectedItem.description }}</p>
-                <p class="text-sm mb-4 text-center">Количество: {{ selectedItem.count }}</p>
-              </div>
-              <button
-                v-if="!isDeleteConfirmOpen"
-                @click="openDeleteConfirm"
-                class="mt-4 w-full bg-[#FA7272] text-sm py-2 rounded hover:bg-[#FF8888] transition-colors cursor-pointer"
-              >
-                Удалить предмет
-              </button>
-              <div v-else class="space-y-2">
-                <input
-                  v-model="deleteQuantity"
-                  type="number"
-                  placeholder="Enter quantity"
-                  class="w-full bg-[#1D1D1D] border border-[#4D4D4D] rounded px-3 py-2 text-white"
-                  min="1"
-                  :max="selectedItem.count"
+              <div class="flex flex-col">
+                <img
+                  :src="selectedItem.image"
+                  alt="Item"
+                  class="w-24 h-24 object-contain mx-auto mb-4"
                 />
-                <div class="flex space-x-2">
-                  <button
-                    @click="closeDeleteConfirm"
-                    class="mt-4 w-full bg-white text-sm text-[#2D2D2D] py-2 rounded hover:bg-[#CFCFCF] transition-colors cursor-pointer"
+                <div class="border-y-1 py-2 border-[#4D4D4D] flex-1">
+                  <h3 class="text-2xl font-bold text-center">
+                    {{ selectedItem.name }}
+                  </h3>
+                  <p
+                    :class="{
+                      'max-h-[100px]': isDeleteConfirmOpen,
+                      'max-h-[200px]': !isDeleteConfirmOpen,
+                    }"
+                    class="text-sm mb-4 mt-2 text-center overflow-y-auto"
                   >
-                    Отмена
-                  </button>
-                  <button
-                    @click="confirmDelete"
-                    class="mt-4 w-full bg-[#FA7272] text-sm py-2 rounded hover:bg-[#FF8888] transition-colors cursor-pointer"
-                  >
-                    Подтвердить
-                  </button>
+                    {{ selectedItem.description }}
+                  </p>
+                  <p class="text-sm mb-4 text-center">Количество: {{ selectedItem.count }}</p>
+                </div>
+                <button
+                  v-if="!isDeleteConfirmOpen"
+                  @click="openDeleteConfirm"
+                  class="mt-4 w-full bg-[#FA7272] text-sm py-2 rounded-md hover:bg-[#FF8888] transition-colors cursor-pointer"
+                >
+                  Удалить предмет
+                <!-- TODO: добавить вывод ошибки если пользователь ввел некорректное количество -->
+                  
+                </button>
+                <div v-else class="space-y-2">
+                  <input
+                    v-model="deleteQuantity"
+                    type="number"
+                    placeholder="Введите количество"
+                    class="w-full bg-[#1D1D1D] border border-[#4D4D4D] rounded px-3 py-2 text-sm"
+                    min="1"
+                    :max="selectedItem.count"
+                  />
+                  <div class="flex space-x-3">
+                    <button
+                      @click="closeDeleteConfirm"
+                      class="mt-4 w-full bg-white text-sm text-[#2D2D2D] py-2 px-2 rounded-md hover:bg-[#CFCFCF] transition-colors cursor-pointer"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      @click="confirmDelete"
+                      class="mt-4 w-full bg-[#FA7272] text-sm py-2 px-2 rounded-md hover:bg-[#FF8888] transition-colors cursor-pointer"
+                    >
+                      Подтвердить
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </Transition>
       </div>
-      <div class="relative bg-[#262626] border border-[#4D4D4D] rounded-lg py-4 px-4 mt-6">
+      <div class="relative bg-[#262626] border border-[#4D4D4D] rounded-lg py-4 px-4 mt-6 flex flex-col gap-2">
         <input class="max-w-11/12 w-full gradient rounded-md py-1 px-4" type="text" />
         <div class="absolute top-2.5 right-3 cursor-pointer">
           <svg
@@ -364,5 +378,29 @@ onMounted(() => {
 
 .slide-leave-active {
   animation: slideOut 0.4s ease forwards;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+p::-webkit-scrollbar {
+  width: 8px;
+}
+
+p::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 10px;
+}
+
+p::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  border: 2px solid #333;
+}
+
+p::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }
 </style>
