@@ -127,7 +127,7 @@ const onDragOver = (event) => {
 const openItemInfo = (item, index) => {
   if (item) {
     selectedItem.value = { ...item, index }
-    console.log('Selected Item:', JSON.parse(JSON.stringify(selectedItem.value)))
+    // console.log('Selected Item:', JSON.parse(JSON.stringify(selectedItem.value)))
     isInfoOpen.value = true
   }
 }
@@ -174,19 +174,72 @@ const updateGridRect = () => {
   }
 }
 
+const isDarkTheme = ref(true)
+
+// const toggleTheme = () => {
+//   isDarkTheme.value = !isDarkTheme.value
+//   if (isDarkTheme.value) {
+//     document.documentElement.classList.add('dark')
+//   } else {
+//     document.documentElement.classList.remove('dark')
+//   }
+// }
+
 onMounted(() => {
   loadFromLocalStorage()
   updateGridRect()
   window.addEventListener('resize', updateGridRect)
+  document.body.classList.toggle('dark', isDarkTheme.value)
 })
 </script>
 
 <template>
   <div class="relative flex items-center justify-center min-h-screen w-full">
-    <div class="bg-[#1D1D1D] max-w-[850px] w-full p-8 flex flex-col">
+    <div class="bg-[#1D1D1D] max-w-[850px] w-full p-8 flex flex-col relative">
+      <!-- <button
+        @click="toggleTheme"
+        class="absolute top-1 right-1 p-2 rounded-full bg-gray-700 dark:bg-[#4D4D4D] cursor-pointer"
+      >
+        <svg
+          v-if="isDarkTheme"
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+          />
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+          />
+        </svg>
+      </button> -->
       <div class="flex items-center justify-center gap-6 relative">
         <div class="bg-[#262626] border border-[#4D4D4D] rounded-lg py-[18px] px-4">
-          <img class="rounded-md object-cover" src="/public/img-blur.png" alt="#" width="208px" height="240px"/>
+          <img
+            class="rounded-md object-cover"
+            src="/public/img-blur.png"
+            alt="#"
+            width="208px"
+            height="240px"
+          />
           <h2 class="text-xl text-center mt-1">Инвентарь</h2>
           <p class="text-center max-w-[200px] mt-1 overflow-y-auto max-h-[192px]">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos sapiente commodi aspernatur
@@ -273,8 +326,7 @@ onMounted(() => {
                   class="mt-4 w-full bg-[#FA7272] text-sm py-2 rounded-md hover:bg-[#FF8888] transition-colors cursor-pointer"
                 >
                   Удалить предмет
-                <!-- TODO: добавить вывод ошибки если пользователь ввел некорректное количество -->
-                  
+                  <!-- TODO: добавить вывод ошибки если пользователь ввел некорректное количество -->
                 </button>
                 <div v-else class="space-y-2">
                   <input
@@ -305,7 +357,9 @@ onMounted(() => {
           </div>
         </Transition>
       </div>
-      <div class="relative bg-[#262626] border border-[#4D4D4D] rounded-lg py-4 px-4 mt-6 flex flex-col gap-2">
+      <div
+        class="relative bg-[#262626] border border-[#4D4D4D] rounded-lg py-4 px-4 mt-6 flex flex-col gap-2"
+      >
         <input class="max-w-11/12 w-full gradient rounded-md py-1 px-4" type="text" />
         <div class="absolute top-2.5 right-3 cursor-pointer">
           <svg
@@ -327,6 +381,31 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* .dark {
+  color: white;
+  background-color: #1d1d1d;
+}
+
+.dark .bg-\[#1D1D1D\] {
+  background-color: #f3f4f6;
+}
+
+.dark .bg-\[#262626\] {
+  background-color: white;
+}
+
+.dark .border-\[#4D4D4D\] {
+  border-color: #d1d5db;
+}
+
+.dark .text-gray-400 {
+  color: #4b5563;
+}
+
+.dark .hover\:bg-\[#2F2F2F\]:hover {
+  background-color: #e5e7eb;
+} */
+
 .grid > div {
   box-sizing: border-box;
 }
